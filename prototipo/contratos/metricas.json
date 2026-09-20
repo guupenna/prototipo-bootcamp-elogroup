@@ -1,0 +1,258 @@
+{
+  "version": "1.0.0",
+  "reference": "Vertice_Retail_BusinessCase.pdf seções 9–14 + revisão técnica 2026-09-16",
+  "default_period": {
+    "start": "2023-01-01",
+    "end": "2023-12-31"
+  },
+  "populations": {
+    "A": "todos os status no período",
+    "B": "status_pagamento == Aprovado e devolvido == False"
+  },
+  "monetary_policy": "centavos inteiros; arredondamento HALF_UP por pedido; soma antes de razão; exibir arredondado somente na interface",
+  "owner": "papel: responsável de Analytics/Finanças; pessoa ainda não designada",
+  "metrics": [
+    {
+      "id": "pedidos",
+      "name": "Quantidade de pedidos",
+      "formula": "count(order_id)",
+      "population": "A ou B",
+      "unit": "pedido",
+      "fields": [
+        "order_id"
+      ],
+      "status": "calculavel",
+      "limitations": "Grão único por order_id.",
+      "owner": "Analytics/Finanças — a designar",
+      "version": "1.0.0",
+      "source": [
+        "data-room/vendas.csv"
+      ],
+      "denominator": "não se aplica",
+      "period_rule": "Scope: datas inclusivas de pedido; default2023. Atendimento acompanha tickets posteriores disponíveis, janela própria exibida."
+    },
+    {
+      "id": "receita_liquida",
+      "name": "Receita líquida registrada",
+      "formula": "sum(receita_liquida)",
+      "population": "B padrão; A apenas com ressalva",
+      "unit": "BRL",
+      "fields": [
+        "receita_bruta",
+        "desconto_reais",
+        "receita_liquida"
+      ],
+      "status": "calculavel",
+      "limitations": "Não é receita realizada em A; impostos e taxas não reconstruídos.",
+      "owner": "Analytics/Finanças — a designar",
+      "version": "1.0.0",
+      "source": [
+        "data-room/vendas.csv"
+      ],
+      "denominator": "não se aplica",
+      "period_rule": "Scope: datas inclusivas de pedido; default2023. Atendimento acompanha tickets posteriores disponíveis, janela própria exibida."
+    },
+    {
+      "id": "mc",
+      "name": "MC observável",
+      "formula": "sum(receita_liquida-custo_produto-custo_frete)",
+      "population": "B padrão",
+      "unit": "BRL",
+      "fields": [
+        "receita_liquida",
+        "custo_produto",
+        "custo_frete"
+      ],
+      "status": "calculavel",
+      "limitations": "Não inclui rentabilidade completa; tolerância contábil de 1 centavo por linha.",
+      "owner": "Analytics/Finanças — a designar",
+      "version": "1.0.0",
+      "source": [
+        "data-room/vendas.csv"
+      ],
+      "denominator": "não se aplica",
+      "period_rule": "Scope: datas inclusivas de pedido; default2023. Atendimento acompanha tickets posteriores disponíveis, janela própria exibida."
+    },
+    {
+      "id": "mc_pct",
+      "name": "MC% observável",
+      "formula": "100*sum(margem_contribuicao)/sum(receita_liquida)",
+      "population": "B padrão",
+      "unit": "percentual",
+      "fields": [
+        "margem_contribuicao",
+        "receita_liquida"
+      ],
+      "status": "calculavel",
+      "limitations": "Denominador zero retorna indisponível, nunca zero artificial.",
+      "owner": "Analytics/Finanças — a designar",
+      "version": "1.0.0",
+      "source": [
+        "data-room/vendas.csv"
+      ],
+      "denominator": "soma de receita_liquida do mesmo recorte",
+      "period_rule": "Scope: datas inclusivas de pedido; default2023. Atendimento acompanha tickets posteriores disponíveis, janela própria exibida."
+    },
+    {
+      "id": "desconto_pct",
+      "name": "Desconto sobre receita bruta",
+      "formula": "100*sum(desconto_reais)/sum(receita_bruta)",
+      "population": "A ou B, identificado",
+      "unit": "percentual",
+      "fields": [
+        "desconto_reais",
+        "receita_bruta"
+      ],
+      "status": "calculavel",
+      "limitations": "Não usar receita líquida como denominador de desconto concedido.",
+      "owner": "Analytics/Finanças — a designar",
+      "version": "1.0.0",
+      "source": [
+        "data-room/vendas.csv"
+      ],
+      "denominator": "soma de receita_bruta do mesmo recorte",
+      "period_rule": "Scope: datas inclusivas de pedido; default2023. Atendimento acompanha tickets posteriores disponíveis, janela própria exibida."
+    },
+    {
+      "id": "participacao_B",
+      "name": "Proporção de pedidos em B",
+      "formula": "100*count(B)/count(A)",
+      "population": "A como denominador",
+      "unit": "percentual",
+      "fields": [
+        "status_pagamento",
+        "devolvido"
+      ],
+      "status": "calculavel",
+      "limitations": "Não representa cobertura da MC nem efeito causal de realização.",
+      "owner": "Analytics/Finanças — a designar",
+      "version": "1.0.0",
+      "source": [
+        "data-room/vendas.csv"
+      ],
+      "denominator": "count(A) da mesma janela/filtros",
+      "period_rule": "Scope: datas inclusivas de pedido; default2023. Atendimento acompanha tickets posteriores disponíveis, janela própria exibida."
+    },
+    {
+      "id": "atendimento_vinculado",
+      "name": "Custo registrado vinculado",
+      "formula": "sum(custo_operacional_ticket dos vínculos válidos)",
+      "population": "pedidos selecionados + tickets posteriores disponíveis",
+      "unit": "BRL",
+      "fields": [
+        "order_id",
+        "customer_id",
+        "data_abertura",
+        "data_pedido",
+        "custo_operacional_ticket"
+      ],
+      "status": "parcial",
+      "limitations": "Coorte de pedidos; tickets até 2025; tarifa por canal; sem vínculo não prova custo zero.",
+      "owner": "Analytics/Finanças — a designar",
+      "version": "1.0.0",
+      "source": [
+        "data-room/atendimento.csv",
+        "data-room/vendas.csv"
+      ],
+      "denominator": "não se aplica (total conhecido)",
+      "period_rule": "Scope: datas inclusivas de pedido; default2023. Atendimento acompanha tickets posteriores disponíveis, janela própria exibida."
+    },
+    {
+      "id": "cobertura_atendimento",
+      "name": "Cobertura do vínculo",
+      "formula": "100*count(distinct pedidos com ticket válido)/count(pedidos selecionados)",
+      "population": "B padrão",
+      "unit": "percentual",
+      "fields": [
+        "order_id",
+        "customer_id",
+        "data_abertura",
+        "data_pedido"
+      ],
+      "status": "calculavel",
+      "limitations": "Não confundir com fração de tickets da base total.",
+      "owner": "Analytics/Finanças — a designar",
+      "version": "1.0.0",
+      "source": [
+        "data-room/atendimento.csv",
+        "data-room/vendas.csv"
+      ],
+      "denominator": "pedidos selecionados, não tickets totais",
+      "period_rule": "Scope: datas inclusivas de pedido; default2023. Atendimento acompanha tickets posteriores disponíveis, janela própria exibida."
+    },
+    {
+      "id": "roas",
+      "name": "ROAS interno de Marketing",
+      "formula": "sum(receita_gerada)/sum(investimento_reais)",
+      "population": "campanhas; janela própria declarada",
+      "unit": "razao",
+      "fields": [
+        "receita_gerada",
+        "investimento_reais"
+      ],
+      "status": "com_ressalvas",
+      "limitations": "Não atribui MC a pedido; regra temporal e receita atribuída não reconciliadas. Fora das tools iniciais.",
+      "owner": "Analytics/Finanças — a designar",
+      "version": "1.0.0",
+      "source": [
+        "data-room/marketing.csv"
+      ],
+      "denominator": "investimento das mesmas campanhas e janela declarada",
+      "period_rule": "Janela de campanha explícita; início no ano não equivale a receita incorrida nesse ano."
+    },
+    {
+      "id": "cac",
+      "name": "CAC de novos clientes",
+      "formula": "investimento atribuível / novos clientes adquiridos",
+      "population": "aquisição validada",
+      "unit": "BRL/cliente",
+      "fields": [],
+      "status": "nao_calculavel",
+      "limitations": "Conversões não comprovadas como novos clientes.",
+      "owner": "Analytics/Finanças — a designar",
+      "version": "1.0.0",
+      "source": [
+        "data-room/marketing.csv"
+      ],
+      "denominator": "novos clientes adquiridos — não identificados",
+      "period_rule": "Janela de campanha explícita; início no ano não equivale a receita incorrida nesse ano."
+    },
+    {
+      "id": "mc_realizada",
+      "name": "MC econômica após cancelamentos/devoluções",
+      "formula": "não identificável",
+      "population": "A",
+      "unit": "BRL",
+      "fields": [],
+      "status": "nao_calculavel",
+      "limitations": "Faltam reembolso, recuperação e custos efetivamente incorridos.",
+      "owner": "Analytics/Finanças — a designar",
+      "version": "1.0.0",
+      "source": [
+        "data-room/vendas.csv"
+      ],
+      "denominator": "não se aplica",
+      "period_rule": "Scope: datas inclusivas de pedido; default2023. Atendimento acompanha tickets posteriores disponíveis, janela própria exibida."
+    },
+    {
+      "id": "break_even",
+      "name": "Retenção aritmética de equilíbrio",
+      "formula": "M/(M+D)",
+      "population": "B elegível congelada antes do cenário",
+      "unit": "fracao",
+      "fields": [
+        "margem_contribuicao",
+        "desconto_reais"
+      ],
+      "status": "cenario_condicional",
+      "limitations": "M>0; mix constante; custos por pedido retido constantes; D é desconto removido, não ganho garantido.",
+      "owner": "Analytics/Finanças — a designar",
+      "version": "1.0.0",
+      "source": [
+        "data-room/vendas.csv"
+      ],
+      "denominator": "MC_base + desconto removido dos mesmos elegíveis",
+      "period_rule": "Scope: datas inclusivas de pedido; default2023. Atendimento acompanha tickets posteriores disponíveis, janela própria exibida."
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+pandas==3.0.5
+streamlit==1.64.0
+plotly==6.9.0
+openai==2.54.0
+# Os notebooks opcionais usam as dependências de LangGraph já presentes no ambiente.
