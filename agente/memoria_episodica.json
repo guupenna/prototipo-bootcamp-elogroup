@@ -1,0 +1,104 @@
+[
+  {
+    "id": "REV-001",
+    "tipo": "contexto",
+    "titulo": "Populações da análise",
+    "conteudo": "A inclui todos os status; B inclui aprovados sem devolução. Consultar métricas para números e janela.",
+    "status": "confirmado",
+    "confianca": "limitada ao escopo declarado",
+    "origem": "revisão técnica 2026-09-16; prototipo/core.py e contrato",
+    "evidencia": "Definições e limites; consultar ferramenta atual para números.",
+    "autor": "assistente — revisão solicitada pelo usuário",
+    "data": "2026-09-16",
+    "valido_ate": "2027-01-01",
+    "tags": [
+      "governanca",
+      "revisao"
+    ]
+  },
+  {
+    "id": "REV-002",
+    "tipo": "contexto",
+    "titulo": "Frete é componente contábil",
+    "conteudo": "O gap de Marketplace pode ser decomposto; mecanismo operacional e parcela recuperável permanecem sem validação.",
+    "status": "aberto",
+    "confianca": "limitada ao escopo declarado",
+    "origem": "revisão técnica 2026-09-16; prototipo/core.py e contrato",
+    "evidencia": "Definições e limites; consultar ferramenta atual para números.",
+    "autor": "assistente — revisão solicitada pelo usuário",
+    "data": "2026-09-16",
+    "valido_ate": "2027-01-01",
+    "tags": [
+      "governanca",
+      "revisao"
+    ]
+  },
+  {
+    "id": "REV-003",
+    "tipo": "contexto",
+    "titulo": "Simulação de desconto",
+    "conteudo": "Usar motor revisado e retenção hipotética; não há desconto ótimo identificado.",
+    "status": "aberto",
+    "confianca": "limitada ao escopo declarado",
+    "origem": "revisão técnica 2026-09-16; prototipo/core.py e contrato",
+    "evidencia": "Definições e limites; consultar ferramenta atual para números.",
+    "autor": "assistente — revisão solicitada pelo usuário",
+    "data": "2026-09-16",
+    "valido_ate": "2027-01-01",
+    "tags": [
+      "governanca",
+      "revisao"
+    ]
+  },
+  {
+    "id": "REV-004",
+    "tipo": "contexto",
+    "titulo": "Pós-venda e devoluções",
+    "conteudo": "MC registrada fora de B não é perda realizada; custos incorridos e recuperação não estão integralmente disponíveis.",
+    "status": "confirmado",
+    "confianca": "limitada ao escopo declarado",
+    "origem": "revisão técnica 2026-09-16; prototipo/core.py e contrato",
+    "evidencia": "Definições e limites; consultar ferramenta atual para números.",
+    "autor": "assistente — revisão solicitada pelo usuário",
+    "data": "2026-09-16",
+    "valido_ate": "2027-01-01",
+    "tags": [
+      "governanca",
+      "revisao"
+    ]
+  },
+  {
+    "id": "REV-005",
+    "tipo": "contexto",
+    "titulo": "Atendimento vinculado",
+    "conteudo": "Vínculo exige pedido, cliente e cronologia. Tickets posteriores a2023 podem acompanhar pedidos de2023.",
+    "status": "confirmado",
+    "confianca": "limitada ao escopo declarado",
+    "origem": "revisão técnica 2026-09-16; prototipo/core.py e contrato",
+    "evidencia": "Definições e limites; consultar ferramenta atual para números.",
+    "autor": "assistente — revisão solicitada pelo usuário",
+    "data": "2026-09-16",
+    "valido_ate": "2027-01-01",
+    "tags": [
+      "governanca",
+      "revisao"
+    ]
+  },
+  {
+    "id": "REV-006",
+    "tipo": "contexto",
+    "titulo": "Estoque e aquisição",
+    "conteudo": "Snapshot não explica ruptura histórica; marketing não permite CAC de novos clientes nem atribuição individual de MC.",
+    "status": "confirmado",
+    "confianca": "limitada ao escopo declarado",
+    "origem": "revisão técnica 2026-09-16; prototipo/core.py e contrato",
+    "evidencia": "Definições e limites; consultar ferramenta atual para números.",
+    "autor": "assistente — revisão solicitada pelo usuário",
+    "data": "2026-09-16",
+    "valido_ate": "2027-01-01",
+    "tags": [
+      "governanca",
+      "revisao"
+    ]
+  }
+]

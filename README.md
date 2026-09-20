@@ -1,4 +1,5 @@
 # vértice
+
 ### Inteligência de margem
 
 Protótipo desenvolvido para o case **Vértice Retail**, no Bootcamp da EloGroup. Um ambiente para explorar a margem dos pedidos, avaliar cenários e preparar decisões com evidências.
@@ -17,9 +18,16 @@ Protótipo desenvolvido para o case **Vértice Retail**, no Bootcamp da EloGroup
 
 Os resultados das simulações são condicionais às premissas. Não representam ganhos comprovados, e nenhuma política comercial é executada automaticamente.
 
-## Executar localmente
+## Análises e evidências
 
-Você precisa de **Python 3.12** e internet para instalar as dependências. Baixe ou clone o repositório e abra o terminal na pasta raiz.
+A pasta [`analises/`](analises/) reúne os notebooks que documentam a análise e a exploração técnica do projeto:
+
+- **[EDA do Data Room](analises/EDA_data_room.ipynb):** qualidade e integração das bases, análise exploratória, hipóteses, cenários e limitações que sustentam a proposta.
+- **[Agente ReAct com memória](analises/agente_ReAct_memoria.ipynb):** estrutura de investigação com ferramentas de cálculo e memória, com verificações locais. As missões de IA estão desativadas na versão entregue; esse notebook documenta a implementação técnica, não uma nova rodada de descobertas geradas pelo modelo.
+
+Os notebooks incluem resultados salvos e podem ser visualizados no GitHub sem executar código. Para reexecutá-los, use Jupyter ou VS Code e mantenha a estrutura do projeto: a EDA requer os cinco CSVs de `data-room/`; o ReAct também requer as memórias de `agente/` e dependências adicionais de LangChain/LangGraph. As dependências do aplicativo abaixo não incluem necessariamente todas as dependências dos notebooks.
+
+## Executar localmente
 
 Crie um ambiente virtual:
 
@@ -27,9 +35,7 @@ Crie um ambiente virtual:
 python -m venv .venv
 ```
 
-> No Linux/macOS, use `python3` se o comando `python` não estiver disponível.
-
-**Windows — PowerShell ou Prompt de Comando**
+**Windows**
 
 ```powershell
 .venv\Scripts\python.exe -m pip install -r prototipo/requirements.txt
@@ -59,6 +65,7 @@ VERTICE_MODEL = "claude-opus-47"
 
 O modelo acima é o usado nesta implementação; sua disponibilidade depende do acesso fornecido pelo bootcamp. Salve o arquivo e reinicie o aplicativo. As consultas usam os créditos do provedor.
 
+Essa configuração ativa o Copilot do aplicativo. O notebook ReAct utiliza variáveis de ambiente e a opção `EXECUTAR_LLM`, conforme suas próprias instruções.
 
 ## Estrutura
 
@@ -69,13 +76,22 @@ O modelo acima é o usado nesta implementação; sua disponibilidade depende do 
 │   ├── requirements.txt
 │   ├── GUIA_DE_USO.md
 │   └── contratos/
+├── analises/              # Notebooks com resultados salvos
+│   ├── EDA_data_room.ipynb
+│   └── agente_ReAct_memoria.ipynb
+├── agente/                # Memórias usadas pelo notebook ReAct
+│   ├── memoria_semantica.md
+│   └── memoria_episodica.json
 ├── data-room/
 │   ├── vendas.csv
-│   └── atendimento.csv
+│   ├── atendimento.csv
+│   ├── clientes.csv
+│   ├── marketing.csv
+│   └── estoque.csv
 └── .streamlit/
     └── config.toml        # Tema e configuração do servidor
 ```
 
-Mantenha as pastas nessa disposição. As decisões são salvas localmente em `prototipo/runtime/`, criada ao executar, e não são compartilhadas automaticamente entre computadores.
+Mantenha as pastas nessa disposição. O aplicativo utiliza `vendas.csv` e `atendimento.csv`; os demais CSVs são usados pela EDA. As decisões são salvas localmente em `prototipo/runtime/`, criada ao executar, e não são compartilhadas automaticamente entre computadores.
 
 **Stack:** Python · pandas · Streamlit · Plotly · SQLite · API de IA
