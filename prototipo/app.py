@@ -9,6 +9,7 @@ if str(ROOT) not in sys.path:
 from dataclasses import asdict, replace
 from datetime import date
 import hashlib
+import html
 import json
 import os
 import pandas as pd
@@ -27,32 +28,68 @@ st.markdown("""<style>
 /* Local system fonts: no remote assets or requests. */
 :root {--ink:#24382F; --muted:#687269; --line:#DADDD4; --paper:#F8F7F2;}
 .stApp {background:var(--paper); color:var(--ink);}
-.block-container {padding:3.8rem 3rem 4rem; max-width:1440px;}
-[data-testid="stHeader"] {background:rgba(248,247,242,.96);}
-h1 {font-family:Georgia,'Times New Roman',serif !important; font-size:clamp(2.5rem,4vw,3.8rem) !important; font-weight:400 !important; letter-spacing:-.045em !important; line-height:1.12 !important; padding-bottom:1rem !important; color:var(--ink);}
+.block-container {padding:1.25rem 3rem 4rem; max-width:1440px;}
+[data-testid="stHeader"] {background:transparent;}
+[data-testid="stToolbar"], [data-testid="stStatusWidget"], #MainMenu {display:none !important;}
+h1 {font-family:Georgia,'Times New Roman',serif !important; font-size:clamp(2.5rem,3vw,3.5rem) !important; font-weight:400 !important; letter-spacing:-.045em !important; line-height:1.08 !important; padding-bottom:.75rem !important; color:var(--ink);}
 h2,h3 {font-weight:500 !important; letter-spacing:-.025em !important; color:var(--ink);}
 h3 {font-size:1.15rem !important;}
 [data-testid="stCaptionContainer"] {color:var(--muted);}
 [data-testid="stSidebar"] {background:#ECEEE6; border-right:1px solid var(--line);}
-[data-testid="stSidebar"] [data-testid="stSidebarContent"] {padding-top:1rem;}
-.brand {display:flex;align-items:center;gap:12px;padding:12px 0 6px;}
+[data-testid="stSidebar"] [data-testid="stSidebarContent"] {padding-top:0;}
+[data-testid="stSidebar"] [data-testid="stSidebarHeader"] {height:0 !important;min-height:0 !important;margin-bottom:0 !important;position:relative;z-index:2;}
+[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] {position:absolute;top:1.15rem;right:0;}
+[data-testid="stSidebar"] [data-testid="stSidebarUserContent"],
+[data-testid="stSidebar"] .block-container {padding-top:1.25rem !important;padding-bottom:2rem !important;}
+[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] > [data-testid="stVerticalBlock"] {gap:.85rem;}
+.brand {display:flex;align-items:center;gap:12px;padding:8px 0 2px;}
 .brand-mark {width:28px;height:32px;border-left:3px solid #42634D;border-bottom:3px solid #42634D;transform:skew(-18deg);position:relative;margin-left:6px;}
 .brand-mark:after {content:'';position:absolute;left:8px;top:0;height:24px;border-left:3px solid #B28339;}
 .brand-name {font-family:Georgia,serif;font-size:2rem;letter-spacing:-.06em;}
-.brand-sub {font-size:.66rem;letter-spacing:.15em;text-transform:uppercase;color:#59655A;margin:0 0 28px 46px;}
-[data-testid="stSidebar"] [role="radiogroup"] {gap:3px;}
-[data-testid="stSidebar"] [role="radiogroup"] label {padding:9px 12px;border-radius:4px;transition:background .15s;}
+.brand-sub {font-size:.66rem;letter-spacing:.15em;text-transform:uppercase;color:#59655A;margin:0 0 1.1rem 46px;}
+[data-testid="stSidebar"] [role="radiogroup"] {gap:.3rem;}
+[data-testid="stSidebar"] [role="radiogroup"] label {min-height:42px;padding:8px 10px;border-radius:4px;transition:background .15s;}
 [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) {background:#DCE3D7;box-shadow:inset 3px 0 #42634D;}
 [data-testid="stSidebar"] [role="radiogroup"] label:hover {background:#E1E6DB;}
+[data-testid="stSidebar"] [data-testid="stElementContainer"]:has(hr) {margin:.5rem 0 .35rem;}
+[data-testid="stSidebar"] hr {margin:0;}
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {margin-bottom:0;}
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"] {margin-bottom:.35rem;}
 [data-testid="stMetric"] {background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;padding:18px 0 22px;}
 [data-testid="stMetricValue"] {font-size:clamp(1.05rem,1.75vw,1.8rem);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.04em;color:var(--ink);}
 [data-testid="stMetricLabel"] p {white-space:normal;font-size:.78rem;color:#586359;}
+.kpi-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:0 0 .65rem;}
+.kpi-card {min-width:0;min-height:142px;display:flex;flex-direction:column;padding:18px 20px 16px;background:#FCFBF7;border:1px solid var(--line);border-top:2px solid #42634D;border-radius:6px;box-shadow:0 1px 2px rgba(36,56,47,.035);}
+.kpi-label {display:flex;align-items:center;gap:6px;min-height:19px;font-size:.75rem;line-height:1.35;color:#687269;}
+.kpi-help {display:inline-flex;align-items:center;justify-content:center;flex:0 0 15px;width:15px;height:15px;border:1px solid #98A198;border-radius:50%;font-size:.6rem;font-weight:600;color:#758076;cursor:help;}
+.kpi-value {margin:12px 0 0;font-size:clamp(1.35rem,2vw,2rem);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.045em;line-height:1.12;color:var(--ink);overflow-wrap:anywhere;}
+.kpi-card.has-comparison .kpi-value {margin-bottom:14px;}
+.kpi-total {margin-top:auto;padding-top:10px;border-top:1px solid #E6E8E1;font-size:.72rem;line-height:1.35;color:#7A827B;font-variant-numeric:tabular-nums;}
+.kpi-total strong {font-weight:500;color:#59635B;}
+.kpi-reference {display:flex;align-items:baseline;gap:.75rem;max-width:68rem;margin:.15rem 0 1.4rem;padding:.65rem .8rem;background:#F0F1EB;border-left:2px solid #AAB7A6;border-radius:0 4px 4px 0;color:#687269;font-size:.72rem;line-height:1.5;}
+.kpi-reference-label {flex:0 0 auto;font-size:.62rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#4F6655;}
 .eyebrow {font-size:.65rem;letter-spacing:.18em;font-weight:600;color:#63745E;border-top:3px solid #42634D;padding-top:12px;margin-bottom:8px;}
+.page-heading {margin:0 0 1rem;}
+.page-heading h1 {margin:0 !important;padding:0 0 .6rem !important;border-bottom:2px solid #42634D;}
 [data-testid="stVerticalBlockBorderWrapper"]>div {border-radius:3px !important;}
 [data-testid="stExpander"] {background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;}
 [data-testid="stExpander"] summary {padding:14px 4px;}
 [data-testid="stTabs"] [role="tablist"] {border-bottom:1px solid var(--line);gap:28px;}
-[data-testid="stTabs"] [role="tab"] {padding:10px 0;font-size:.88rem;}
+[data-testid="stTabs"] [role="tab"] {padding:12px 2px 10px;font-size:.88rem;color:#687269;}
+[data-testid="stTabs"] [role="tab"][aria-selected="true"] {color:var(--ink);font-weight:500;}
+[data-testid="stTabs"] [data-baseweb="tab-highlight"] {height:2px;background:#42634D;}
+[class*="st-key-panel_"] [data-testid="stVerticalBlockBorderWrapper"] > div {background:#FCFBF7;border:1px solid var(--line) !important;border-radius:6px !important;padding:1rem 1.1rem .7rem;box-shadow:0 1px 2px rgba(36,56,47,.025);}
+.panel-title {font-size:1rem;font-weight:500;line-height:1.3;color:var(--ink);margin:.05rem 0 .35rem;}
+.st-key-panel_monthly :is([data-testid="stButtonGroup"],[data-testid="stSegmentedControl"]) {margin:0;overflow-x:auto;overflow-y:hidden;border-bottom:1px solid #E1E4DC;scrollbar-width:none;}
+.st-key-panel_monthly :is([data-testid="stButtonGroup"],[data-testid="stSegmentedControl"])::-webkit-scrollbar {display:none;}
+.st-key-panel_monthly :is([data-testid="stButtonGroup"],[data-testid="stSegmentedControl"]) [role="group"] {display:flex;min-width:max-content;background:transparent;border:0;}
+.st-key-panel_monthly :is([data-testid="stButtonGroup"],[data-testid="stSegmentedControl"]) button {position:relative;min-height:36px;margin:0 16px 0 0 !important;padding:5px 4px 10px !important;background:transparent !important;border:0 !important;border-radius:0 !important;box-shadow:none !important;color:#687269 !important;font-size:.78rem;font-weight:400;white-space:nowrap;}
+.st-key-panel_monthly :is([data-testid="stButtonGroup"],[data-testid="stSegmentedControl"]) button:last-child {margin-right:0 !important;}
+.st-key-panel_monthly :is([data-testid="stButtonGroup"],[data-testid="stSegmentedControl"]) button:hover {color:#3F5C48 !important;}
+.st-key-panel_monthly :is([data-testid="stButtonGroup"],[data-testid="stSegmentedControl"]) button:is([aria-pressed="true"],[aria-checked="true"],[data-active="true"],[data-selected="true"]) {color:#24382F !important;font-weight:500;}
+.st-key-panel_monthly :is([data-testid="stButtonGroup"],[data-testid="stSegmentedControl"]) button:is([aria-pressed="true"],[aria-checked="true"],[data-active="true"],[data-selected="true"])::after {content:'';position:absolute;right:0;bottom:-1px;left:0;height:2px;background:#42634D;}
+.st-key-panel_monthly :is([data-testid="stButtonGroup"],[data-testid="stSegmentedControl"]) button:focus-visible {outline:2px solid rgba(66,99,77,.42) !important;outline-offset:-2px;border-radius:2px !important;}
+[class*="st-key-panel_"] [data-testid="stPlotlyChart"] {margin-top:-.2rem;}
 [data-testid="stButton"] button, [data-testid="stDownloadButton"] button {border-radius:4px;font-size:.85rem;min-height:40px;box-shadow:none;}
 [data-testid="stButton"] button[kind="secondary"] {background:transparent;border-color:#B9C4B4;}
 [data-testid="stButton"] button:hover {border-color:#42634D;}
@@ -60,7 +97,11 @@ h3 {font-size:1.15rem !important;}
 [data-testid="stForm"] {border-radius:3px;border-color:var(--line);}
 hr {border-color:var(--line);}
 @media (max-width:700px) {
- .block-container {padding:3.4rem 1.2rem 3rem;}
+ .block-container {padding:1.25rem 1.2rem 3rem;}
+ .kpi-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+ .kpi-card {min-height:132px;padding:15px 14px 13px;}
+ .kpi-value {font-size:1.25rem;}
+ .kpi-reference {align-items:flex-start;flex-direction:column;gap:.2rem;}
  .st-key-overview_kpis [data-testid="stHorizontalBlock"] {flex-wrap:wrap !important;gap:.8rem;}
  .st-key-overview_kpis [data-testid="stColumn"] {width:calc(50% - .8rem) !important;flex:1 1 calc(50% - .8rem) !important;min-width:0 !important;}
  [data-testid="stMetricValue"] {font-size:1.18rem;}
@@ -128,11 +169,41 @@ def preset(name):
 
 def chart(figure, key):
     figure.update_layout(template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                         font=dict(family='Arial', color=NAVY, size=12), margin=dict(l=15, r=15, t=35, b=25),
-                         legend=dict(orientation='h', y=-.2), separators=',.')
-    figure.update_xaxes(gridcolor='#E4E6DD', zerolinecolor='#CDD3C7')
-    figure.update_yaxes(gridcolor='#E4E6DD', zerolinecolor='#CDD3C7')
+                         font=dict(family='Arial', color=NAVY, size=12), margin=dict(l=18, r=18, t=12, b=32),
+                         separators=',.', hoverlabel=dict(bgcolor='#FCFBF7', bordercolor='#C9D0C7', font_color=NAVY))
+    if not figure.layout.legend.orientation:
+        figure.update_layout(legend=dict(orientation='h', y=-.18))
+    axis_style=dict(gridcolor='#E7E9E2', zerolinecolor='#D6DAD2', tickfont=dict(color='#6F786F',size=11),
+                    title_font=dict(color='#687269',size=12), automargin=True)
+    figure.update_xaxes(**axis_style)
+    figure.update_yaxes(**axis_style)
     st.plotly_chart(figure, width='stretch', key=key, config={'displayModeBar': False})
+
+
+def partial_months(rows, scope, room):
+    """Months clipped by the selected window or by the source coverage."""
+    if not rows:
+        return set()
+    start, end = pd.Timestamp(scope.start), pd.Timestamp(scope.end)
+    source_start = room.orders.dt.min().normalize()
+    source_end = room.orders.dt.max().normalize()
+    partial = set()
+    first_month, last_month = rows[0]['grupo'], rows[-1]['grupo']
+    if start.day != 1 or (start.to_period('M') == source_start.to_period('M') and source_start.day != 1):
+        partial.add(first_month)
+    if end != end + pd.offsets.MonthEnd(0) or (end.to_period('M') == source_end.to_period('M') and source_end != source_end + pd.offsets.MonthEnd(0)):
+        partial.add(last_month)
+    return partial
+
+
+def trend_value(value, metric):
+    if value is None:
+        return '—'
+    if metric in {'margem_contribuicao', 'receita_liquida'}:
+        return brl(value)
+    if metric == 'mc_pct':
+        return percent(value)
+    return number(value)
 
 
 def evidence(e, label='Como estes números foram calculados'):
@@ -181,7 +252,8 @@ def signal_cards(room, scope):
 def cards(e, total):
     with st.container(key='overview_kpis'):
         values = e['valores']
-        for col, title, value, tip in zip(st.columns(4),
+        items = []
+        for title, value, tip in zip(
             ['Pedidos no recorte', 'Receita líquida registrada', 'MC observável', 'MC% observável'],
             [number(values['pedidos']), brl(values['receita_liquida']), brl(values['margem_contribuicao']), percent(values['mc_pct'])],
             ['Contagem de pedidos únicos no recorte.', 'Soma de receita bruta menos desconto; não reconstrói impostos.',
@@ -189,9 +261,17 @@ def cards(e, total):
             field = {'Pedidos no recorte':'pedidos','Receita líquida registrada':'receita_liquida','MC observável':'margem_contribuicao','MC% observável':'mc_pct'}[title]
             whole = total['valores'][field]
             formatted = percent(whole) if field=='mc_pct' else number(whole) if field=='pedidos' else brl(whole)
-            col.metric(title, value, help=tip)
-            col.caption('Total: '+formatted)
-        st.caption('Referência: total do mesmo período e população, sem filtros de canal, categoria, valor ou desconto. MC% é a margem do total, não a soma dos percentuais.')
+            comparison = '' if formatted == value else f'<div class="kpi-total"><strong>Total</strong>&nbsp;&nbsp;{html.escape(formatted)}</div>'
+            card_class = 'kpi-card has-comparison' if comparison else 'kpi-card'
+            items.append(
+                f'<article class="{card_class}">'
+                f'<div class="kpi-label">{html.escape(title)}<span class="kpi-help" title="{html.escape(tip, quote=True)}" aria-label="{html.escape(tip, quote=True)}">?</span></div>'
+                f'<div class="kpi-value">{html.escape(value)}</div>'
+                f'{comparison}'
+                '</article>'
+            )
+        st.markdown('<div class="kpi-grid">'+''.join(items)+'</div>', unsafe_allow_html=True)
+        st.markdown('<aside class="kpi-reference"><span class="kpi-reference-label">Base de comparação</span><span>Total do mesmo período e população, sem filtros de canal, categoria, valor ou desconto. MC% representa a margem do total, não a soma dos percentuais.</span></aside>', unsafe_allow_html=True)
 
 
 def table_groups(e):
@@ -208,17 +288,21 @@ def table_groups(e):
 
 DIMENSION_LABELS = {'canal':'Canal', 'categoria':'Categoria', 'faixa_ticket':'Faixa de valor', 'mes':'Mês', 'com_desc':'Com / sem desconto', 'com_frete':'Com / sem frete', 'metodo_pagamento':'Pagamento'}
 METRIC_LABELS = {'mc_pct':'MC (%)', 'margem_contribuicao':'MC (R$)', 'receita_liquida':'Receita líquida (R$)', 'pedidos':'Pedidos', 'custo_frete':'Frete (R$)', 'desconto_reais':'Descontos (R$)'}
+TREND_METRIC_LABELS = {'margem_contribuicao':'MC (R$)', 'mc_pct':'MC (%)', 'receita_liquida':'Receita líquida', 'pedidos':'Pedidos'}
 
 
 def group_name(name):
-    return {'True':'Sim', 'False':'Não', 'até 100':'Até R$ 100', '(100,250]':'R$ 100 a R$ 250', '(250,500]':'R$ 250 a R$ 500', '(500,1000]':'R$ 500 a R$ 1.000', '>1000':'Acima de R$ 1.000'}.get(str(name),str(name))
+    return {'True':'Sim', 'False':'Não', 'até 100':'Até R$ 100', '(100,250]':'R$ 100–250', '(250,500]':'R$ 250–500', '(500,1000]':'R$ 500–1.000', '>1000':'Acima de R$ 1 mil'}.get(str(name),str(name))
 
 
 def bars(e, metric, key, height=300):
     groups = e['valores']['grupos']
-    if e['valores'].get('dimensao') == 'faixa_ticket':
+    dimension = e['valores'].get('dimensao')
+    if dimension == 'faixa_ticket':
         order=['até 100','(100,250]','(250,500]','(500,1000]','>1000']
         groups=sorted(groups,key=lambda g: order.index(g['grupo']))
+    elif dimension == 'canal':
+        groups=sorted(groups,key=lambda g: g[metric] if g[metric] is not None else float('-inf'),reverse=True)
     if not groups:
         st.info('Nenhum grupo disponível.')
         return
@@ -228,7 +312,10 @@ def bars(e, metric, key, height=300):
         textposition='outside', cliponaxis=False,
         customdata=[[g['pedidos'],g['receita_liquida']] for g in groups],
         hovertemplate='%{y}<br>'+METRIC_LABELS[metric]+': %{x:,.2f}<br>Pedidos: %{customdata[0]:,}<br>Receita: R$ %{customdata[1]:,.2f}<extra></extra>'))
-    f.update_layout(height=max(height,len(groups)*38+65),xaxis_title=METRIC_LABELS[metric],yaxis=dict(autorange='reversed'),bargap=.32)
+    f.update_layout(height=max(height,len(groups)*36+54),xaxis_title=METRIC_LABELS[metric],yaxis=dict(autorange='reversed'),bargap=.38)
+    if key in {'channels', 'ticket_bands'}:
+        f.update_xaxes(title_text=None)
+        f.update_yaxes(showgrid=False, zeroline=False)
     points=[g[metric] for g in groups if g[metric] is not None]
     if points:
         low=min(0,min(points));high=max(0,max(points));span=max(high-low,1)
@@ -268,9 +355,7 @@ def quality_panel(room, metrics):
 
 
 def tower(room, scope, metrics):
-    st.title('Control Tower')
     cards(metrics, comparison_total(room, scope))
-    st.caption('MC = receita líquida − produto − frete. Não representa lucro completo.')
     if not metrics['valores']['pedidos']:
         st.info('Nenhum pedido encontrado. Ajuste os filtros.')
         evidence(metrics)
@@ -280,39 +365,80 @@ def tower(room, scope, metrics):
         left,right=st.columns([1.15,1])
         monthly=room.breakdown('mes',scope)
         channels=room.breakdown('canal',scope)
-        with left,st.container(border=False):
-            st.subheader('Evolução mensal')
-            metric=st.selectbox('Indicador da série', ['margem_contribuicao','mc_pct','receita_liquida','pedidos'],format_func=METRIC_LABELS.get,key='trend_metric',label_visibility='collapsed')
-            rows=monthly['valores']['grupos']
-            f=go.Figure(go.Scatter(x=[g['grupo'] for g in rows],y=[g[metric] for g in rows],mode='lines+markers',line=dict(color=TEAL,width=3),marker=dict(size=7)))
-            f.update_layout(height=270,yaxis_title=METRIC_LABELS[metric],xaxis=dict(type='category',tickmode='array',tickvals=[g['grupo'] for g in rows],ticktext=[g['grupo'][5:7] for g in rows]))
-            chart(f,'monthly')
-        with right,st.container(border=False):
-            st.subheader('Margem por canal')
-            bars(channels,'mc_pct','channels',310)
+        with left:
+            with st.container(border=True,key='panel_monthly'):
+                st.markdown('<div class="panel-title">Evolução mensal</div>',unsafe_allow_html=True)
+                trend_options=['margem_contribuicao','mc_pct','receita_liquida','pedidos']
+                trend_default=st.session_state.get('trend_metric','margem_contribuicao')
+                if trend_default not in trend_options:
+                    trend_default='margem_contribuicao'
+                metric=st.segmented_control('Indicador da série',trend_options,default=trend_default,format_func=TREND_METRIC_LABELS.get,key='trend_metric_selector',selection_mode='single',label_visibility='collapsed') or trend_default
+                st.session_state['trend_metric']=metric
+                rows=monthly['valores']['grupos']
+                month_names={'01':'jan','02':'fev','03':'mar','04':'abr','05':'mai','06':'jun','07':'jul','08':'ago','09':'set','10':'out','11':'nov','12':'dez'}
+                x_values=[g['grupo'] for g in rows]
+                y_values=[g[metric] for g in rows]
+                labels=[month_names.get(g['grupo'][5:7],g['grupo'][5:7]) for g in rows]
+                partial=partial_months(rows,scope,room)
+                hover_data=[[labels[i],trend_value(g[metric],metric),'<br>Parcial' if g['grupo'] in partial else ''] for i,g in enumerate(rows)]
+                f=go.Figure(go.Scatter(
+                    x=x_values,y=y_values,mode='lines+markers',
+                    line=dict(color=TEAL,width=2.5),
+                    marker=dict(size=4.5,color=TEAL,line=dict(color=TEAL,width=0)),
+                    customdata=hover_data,
+                    hovertemplate='<b>%{customdata[0]}</b><br>%{customdata[1]}%{customdata[2]}<extra></extra>',
+                    showlegend=False,
+                ))
+                partial_rows=[(i,g) for i,g in enumerate(rows) if g['grupo'] in partial]
+                if partial_rows:
+                    f.add_trace(go.Scatter(
+                        x=[g['grupo'] for _,g in partial_rows],y=[g[metric] for _,g in partial_rows],mode='markers',
+                        marker=dict(size=8,color='#FCFBF7',line=dict(color=TEAL,width=2),symbol='circle'),
+                        customdata=[[labels[i],trend_value(g[metric],metric)] for i,g in partial_rows],
+                        hovertemplate='<b>%{customdata[0]}</b><br>%{customdata[1]}<br>Parcial<extra></extra>',
+                        showlegend=False,
+                    ))
+                yaxis=dict(title=None,showgrid=True,gridcolor='rgba(104,114,105,.12)',gridwidth=1,zeroline=False)
+                if metric in {'margem_contribuicao','receita_liquida'}:
+                    yaxis.update(tickformat='.1s',separatethousands=True)
+                elif metric=='mc_pct':
+                    yaxis.update(ticksuffix='%',tickformat='.1f')
+                else:
+                    yaxis.update(tickformat=',.0f')
+                f.update_layout(height=280,hovermode='closest',hoverdistance=24,yaxis=yaxis,
+                    xaxis=dict(type='category',tickmode='array',tickvals=x_values,ticktext=labels,showgrid=False,zeroline=False))
+                chart(f,'monthly')
+        with right:
+            with st.container(border=True,key='panel_channels'):
+                st.markdown('<div class="panel-title">Margem de Contribuição por Canal (%)</div>',unsafe_allow_html=True)
+                bars(channels,'mc_pct','channels',300)
         left,right=st.columns([1.15,1])
         bands=room.breakdown('faixa_ticket',scope)
         funnel=room.funnel(replace(scope,population='A'))
-        with left,st.container(border=False):
-            st.subheader('Margem por valor do pedido')
-            bars(bands,'mc_pct','ticket_bands',280)
-        with right,st.container(border=False):
-            st.subheader('Situação dos pedidos')
-            fv=funnel['valores']
-            keys=['aprovados_sem_devolucao','aprovados_devolvidos','nao_aprovados']
-            labels=['Aprovados sem devolução','Aprovados e devolvidos','Não aprovados']
-            f=go.Figure(go.Pie(labels=labels,values=[fv[k]['pedidos'] for k in keys],hole=.66,sort=False,
-                marker=dict(colors=[TEAL,AMBER,'#C9D0BF']),textinfo='percent',hovertemplate='%{label}<br>%{value} pedidos · %{percent}<extra></extra>'))
-            f.update_layout(height=240,annotations=[dict(text=number(fv['total_pedidos']),x=.5,y=.5,showarrow=False,font=dict(size=20))])
-            chart(f,'order_status')
-            st.caption('Todos os status (A), com os mesmos filtros. Não é conversão de visitantes.')
+        with left:
+            with st.container(border=True,key='panel_bands'):
+                st.markdown('<div class="panel-title">Margem de Contribuição por Valor do Pedido (%)</div>',unsafe_allow_html=True)
+                bars(bands,'mc_pct','ticket_bands',300)
+        with right:
+            with st.container(border=True,key='panel_status'):
+                st.markdown('<div class="panel-title">Situação dos pedidos</div>',unsafe_allow_html=True)
+                fv=funnel['valores']
+                keys=['aprovados_sem_devolucao','aprovados_devolvidos','nao_aprovados']
+                labels=['Aprovados sem devolução','Aprovados e devolvidos','Não aprovados']
+                f=go.Figure(go.Pie(labels=labels,values=[fv[k]['pedidos'] for k in keys],hole=.64,sort=False,
+                    domain=dict(x=[0,.54],y=[.04,.96]),marker=dict(colors=[TEAL,AMBER,'#C9D0BF']),
+                    textinfo='percent',textfont=dict(size=11),hovertemplate='%{label}<br>%{value} pedidos · %{percent}<extra></extra>'))
+                f.update_layout(height=290,showlegend=True,
+                    legend=dict(orientation='v',x=.61,y=.5,yanchor='middle',font=dict(size=11),traceorder='normal'),
+                    annotations=[dict(text=f"<b>{number(fv['total_pedidos'])}</b><br><span style='font-size:11px;color:#687269'>pedidos</span>",x=.27,y=.5,showarrow=False,font=dict(size=21))])
+                chart(f,'order_status')
         signal_cards(room,scope)
         with st.expander('Dados e cálculos dos gráficos'):
             evidence(monthly,'Série mensal')
             evidence(channels,'Comparação por canal')
             evidence(bands,'Faixas de valor')
             evidence(funnel,'Situação dos pedidos')
-        st.caption('Comparações descritivas. Meses nas bordas podem ser parciais conforme os filtros.')
+        st.caption('Comparações descritivas; diferenças observadas não demonstram efeito causal.')
     with quality:
         quality_panel(room,metrics)
 
@@ -688,8 +814,10 @@ def main():
         metrics = room.metrics(scope)
     except ValueError as exc:
         st.error(str(exc)); st.stop()
-    st.markdown('<div class="eyebrow">VÉRTICE RETAIL &nbsp; / &nbsp; ANÁLISE DE RENTABILIDADE</div>', unsafe_allow_html=True)
-    st.caption(scope_label(scope))
+    if state.page == PAGES[0]:
+        st.markdown('<header class="page-heading"><h1>Control Tower</h1></header>', unsafe_allow_html=True)
+    else:
+        st.markdown('<div class="eyebrow">VÉRTICE RETAIL &nbsp; / &nbsp; ANÁLISE DE RENTABILIDADE</div>', unsafe_allow_html=True)
     if scope.ticket_lt is not None or scope.discounted_only:
         st.caption(('Receita líquida histórica < '+brl(scope.ticket_lt)+' · ' if scope.ticket_lt else '')+('com desconto' if scope.discounted_only else 'com ou sem desconto'))
     if scope.population=='A':
