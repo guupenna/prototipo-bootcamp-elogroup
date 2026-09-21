@@ -18,6 +18,12 @@ Protótipo desenvolvido para o case **Vértice Retail**, no Bootcamp da EloGroup
 
 Os resultados das simulações são condicionais às premissas. Não representam ganhos comprovados, e nenhuma política comercial é executada automaticamente.
 
+## Documentação da entrega
+
+Este repositório reúne a entrega do projeto: **business case, protótipo e notebooks de análise**.
+
+O **[documentacao.zip](documentacao.zip)**, disponível na raiz, contém o business case atualizado. Baixe e extraia o arquivo para consultar a documentação da solução. As análises estão em [`analises/`](analises/), e o código do sistema está em [`prototipo/`](prototipo/).
+
 ## Análises e evidências
 
 A pasta [`analises/`](analises/) reúne os notebooks que documentam a análise e a exploração técnica do projeto:
@@ -71,6 +77,7 @@ Essa configuração ativa o Copilot do aplicativo. O notebook ReAct utiliza vari
 
 ```text
 .
+├── documentacao.zip       # Business case
 ├── prototipo/             # Aplicação, cálculos e registro de decisões
 │   ├── app.py
 │   ├── requirements.txt
